@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Древо">
+<meta name="theme-color" content="#2e7d32">
+<title>Древо структуры</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#f4f7f4;--fg:#1b3a1e;--card:#fff;--ln:#43a047;--mut:#5f7a62;--bd:#cfd8cf;--btn:#2e7d32;--btnt:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#121a13;--fg:#e3f1e4;--card:#1c261d;--mut:#9bb59d;--bd:#34443a;--btn:#4caf50;--btnt:#0d1a0e}}
+html{scroll-padding-top:env(safe-area-inset-top,0px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.35 Arial,Helvetica,sans-serif;-webkit-tap-highlight-color:transparent}
+header{position:sticky;top:env(safe-area-inset-top,0px);left:0;z-index:5;background:var(--bg);display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--bd)}
+h1{font-size:17px;margin:0 auto 0 0}
+button,select,input{font:inherit}
+.b{background:var(--btn);color:var(--btnt);border:0;border-radius:8px;padding:8px 12px;cursor:pointer}
+.b.ol{background:transparent;color:var(--fg);border:1px solid var(--bd)}
+.b.d{background:#c62828;color:#fff}
+#wrap{overflow-x:auto;padding:16px 12px 60px}
+.tree ul{display:flex;justify-content:center;margin:0;padding:22px 0 0;list-style:none;position:relative}
+.tree ul ul::before{content:"";position:absolute;top:0;left:50%;border-left:2px solid var(--ln);height:22px}
+.tree li{position:relative;display:flex;flex-direction:column;align-items:center;padding:22px 6px 0}
+.tree li::before,.tree li::after{content:"";position:absolute;top:0;right:50%;width:50%;height:22px;border-top:2px solid var(--ln)}
+.tree li::after{right:auto;left:50%;border-left:2px solid var(--ln)}
+.tree li:only-child{padding-top:0}
+.tree li:only-child::before,.tree li:only-child::after{display:none}
+.tree li:first-child::before,.tree li:last-child::after{border:0 none}
+.tree li:last-child::before{border-right:2px solid var(--ln);border-radius:0 6px 0 0}
+.tree li:first-child::after{border-radius:6px 0 0 0}
+.tree>ul{padding-top:0;width:max-content;margin:0 auto}
+.tree>ul>li{padding-top:0}.tree>ul>li::before,.tree>ul>li::after{display:none}
+.nd{position:relative;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:bold;cursor:pointer;border:3px solid #43a047;background:#43a047;color:#fff;box-sizing:border-box;user-select:none;-webkit-user-select:none}
+.nd.y{border-color:#f9a825}.nd.p{border-color:#e91e63}.nd.sel{box-shadow:0 0 0 3px var(--bg),0 0 0 5px var(--fg)}
+.nd[data-s]::after{content:attr(data-s);position:absolute;top:-7px;right:-7px;width:16px;height:16px;line-height:14px;text-align:center;border-radius:50%;border:1px solid var(--bd);background:var(--card);color:var(--fg);font-size:9px;font-weight:bold}
+#info{padding:10px 12px;border-bottom:1px solid var(--bd);font-size:13px}
+#info .hint{color:var(--mut)}#info b{font-size:15px}
+#info .bc span{cursor:pointer;color:var(--btn);font-weight:bold}
+#info .bt{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+#info .bt button{border:1px solid var(--bd);background:transparent;color:var(--fg);border-radius:8px;padding:8px 10px;cursor:pointer}
+#info .bt button.pr{background:var(--btn);color:var(--btnt);border:0}
+#info div{margin:2px 0}
+#m{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:20;padding:12px}
+#m.on{display:flex}
+#f{background:var(--card);border-radius:12px;padding:16px;width:min(420px,100%);max-height:90%;overflow:auto}
+#f h2{margin:0 0 10px;font-size:16px}
+#f label{display:block;margin:7px 0 2px;font-size:12px;color:var(--mut)}
+#f input,#f select{width:100%;box-sizing:border-box;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--fg);font-size:16px}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.act{display:flex;gap:8px;margin-top:14px;justify-content:flex-end;flex-wrap:wrap}
+#t{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--btn);color:var(--btnt);padding:8px 14px;border-radius:8px;display:none;z-index:30;max-width:90vw;text-align:center}
+</style></head><body>
+<header><h1>Древо структуры</h1>
+<button class="b" id="sv">💾 Сохранить</button><span id="st" style="font-size:12px;color:var(--mut)"></span><button class="b" id="hm">⌂ Корень</button><button class="b" id="addRoot">+ Корень</button>
+<button class="b ol" id="pdfA">PDF всего</button><button class="b ol" id="exJ">JSON ↓</button><button class="b ol" id="exC">CSV ↓</button>
+<button class="b ol" id="imp">Импорт JSON</button><button class="b ol" id="rst">Сброс</button><button class="b ol" id="inst" hidden>📲 Установить</button>
+<input type="file" id="fi" accept=".json,application/json" hidden></header>
+<div id="info"></div><div id="wrap"><div class="tree" id="tree"></div></div>
+<div id="m"><div id="f"></div></div><div id="t"></div>
+<script>
+const SEED=[{"id": 1, "p": null, "s": "", "ini": "FB", "sp": "uz05270817", "nm": "Burxanova Feruza", "pid": "uz04482872", "l": 55470.3, "r": 552.6, "c": "p"}, {"id": 2, "p": 1, "s": "Л", "ini": "DR", "sp": "uz05270817", "nm": "Rustamova Dilnoza Baxodir qizi", "pid": "ru02881474", "l": 16656.4, "r": 37845.1, "c": "g"}, {"id": 3, "p": 1, "s": "П", "ini": "NB", "sp": "uz04482872", "nm": "Burxonova Nozimaxon", "pid": "uz15365580", "l": 214.3, "r": 55, "c": "y"}, {"id": 4, "p": 2, "s": "Л", "ini": "MI", "sp": "uz05270817", "nm": "Inagamova Mukhlisa", "pid": "uz22840430", "l": 16350.9, "r": 0, "c": "g"}, {"id": 5, "p": 2, "s": "П", "ini": "MK", "sp": "ru02881474", "nm": "Kayumova Munisa Abdulazizo…", "pid": "uz66271372", "l": 6283.3, "r": 30665.1, "c": "g"}, {"id": 6, "p": 3, "s": "Л", "ini": "MA", "sp": "uz04482872", "nm": "Achilova Mastura Mamurovna", "pid": "uz10152128", "l": 55, "r": 70.9, "c": "y"}, {"id": 7, "p": 3, "s": "П", "ini": "RB", "sp": "uz15365580", "nm": "Burxanov Ravshan", "pid": "uz52614688", "l": 0, "r": 0, "c": "y"}, {"id": 8, "p": 4, "s": "Л", "ini": "NG", "sp": "uz05270817", "nm": "Gulyamova Nazokat", "pid": "uz04637785", "l": 15098.7, "r": 131.6, "c": "g"}, {"id": 10, "p": 5, "s": "Л", "ini": "SO", "sp": "ru02881474", "nm": "Omonova S…", "pid": "uz76061500", "l": 5387.2, "r": 541.9, "c": "g"}, {"id": 11, "p": 5, "s": "П", "ini": "SM", "sp": "uz66271372", "nm": "Matchanova…", "pid": "uz46641541", "l": 5898.5, "r": "240…", "c": "g"}, {"id": 12, "p": 6, "s": "Л", "ini": "XN", "sp": "uz10152128", "nm": "Nazarova Xi…", "pid": "uz31553148", "l": 0, "r": 0, "c": "y"}, {"id": 13, "p": 6, "s": "П", "ini": "MA", "sp": "uz10152128", "nm": "Achilova M…", "pid": "uz02830812", "l": 0, "r": 0, "c": "y"}, {"id": 16, "p": 8, "s": "Л", "ini": "FY", "sp": "uz05270817", "nm": "Yakubova Feruza", "pid": "uz48264537", "l": 14624.4, "r": 0, "c": "g"}, {"id": 17, "p": 8, "s": "П", "ini": "OS", "sp": "uz03993826", "nm": "Supieva Oysha", "pid": "uz36721082", "l": 0, "r": 0, "c": "g"}, {"id": 20, "p": 10, "s": "Л", "ini": "LE", "sp": "", "nm": "Er…", "pid": "", "l": "4…", "r": 0, "c": "g"}, {"id": 21, "p": 10, "s": "П", "ini": "TA", "sp": "", "nm": "Ali…", "pid": "", "l": "4…", "r": 0, "c": "g"}, {"id": 22, "p": 11, "s": "Л", "ini": "KX", "sp": "", "nm": "Xa…", "pid": "", "l": "4…", "r": "3…", "c": "g"}, {"id": 23, "p": 11, "s": "П", "ini": "DZ", "sp": "", "nm": "Zu…", "pid": "", "l": "2…", "r": "6…", "c": "g"}, {"id": 32, "p": 16, "s": "Л", "ini": "MM", "sp": "ru02881474", "nm": "Miraliev Mirshokhid", "pid": "uz40753654", "l": 7942.7, "r": 4953.2, "c": "g"}, {"id": 36, "p": 32, "s": "Л", "ini": "MK", "sp": "uz40753654", "nm": "Karimova Markhamat", "pid": "uz61727568", "l": 7195.7, "r": 350.5, "c": "g"}, {"id": 37, "p": 32, "s": "П", "ini": "LK", "sp": "ru02881474", "nm": "Kamalova Lobar", "pid": "uz63400634", "l": 4464.1, "r": 0, "c": "g"}, {"id": 38, "p": 36, "s": "Л", "ini": "AX", "sp": "uz03988014", "nm": "Xakimova Arofatxon", "pid": "uz05413866", "l": 5591.8, "r": 958.9, "c": "g"}, {"id": 39, "p": 36, "s": "П", "ini": "MS", "sp": "uz61727568", "nm": "Shaikromova Muxayyo", "pid": "uz82102163", "l": 0, "r": 0, "c": "g"}, {"id": 40, "p": 37, "s": "Л", "ini": "KF", "sp": "ru02881474", "nm": "Fozilova Kumush", "pid": "uz05314475", "l": 4334.5, "r": 0, "c": "g"}, {"id": 1001, "p": 38, "s": "Л", "ini": "AK", "sp": "ru02881474", "nm": "Kadirova Arofat", "pid": "uz58240552", "l": 5158.8, "r": 0, "c": "g"}, {"id": 1002, "p": 38, "s": "П", "ini": "RK", "sp": "uz03988014", "nm": "Kuralbaeva Roziya", "pid": "uz67651083", "l": 639.5, "r": 0, "c": "g"}, {"id": 1003, "p": 1001, "s": "Л", "ini": "SN", "sp": "uz05270817", "nm": "Normurodova Surayyo", "pid": "uz58314400", "l": 3838.1, "r": 916.9, "c": "g"}, {"id": 1004, "p": 1002, "s": "Л", "ini": "DA", "sp": "uz05413866", "nm": "Adilova Dilnoza", "pid": "uz10755263", "l": 362.5, "r": 0, "c": "g"}, {"id": 1005, "p": 1003, "s": "Л", "ini": "SM", "sp": "uz58314400", "nm": "Mamatmuradova Shohista", "pid": "uz03268244", "l": 3503.2, "r": 0, "c": "g"}, {"id": 1006, "p": 1003, "s": "П", "ini": "IR", "sp": "uz58314400", "nm": "Rajapov Ixtiyorjon", "pid": "uz72206251", "l": 624.4, "r": 0, "c": "g"}, {"id": 1007, "p": 1005, "s": "Л", "ini": "MK", "sp": "uz58314400", "nm": "Khashimova Mukaddas", "pid": "uz77364511", "l": 2115.7, "r": 677.4, "c": "g"}, {"id": 1008, "p": 1006, "s": "Л", "ini": "GK", "sp": "uz58314400", "nm": "Khairullaeva Gulkhae", "pid": "uz37468238", "l": 0, "r": 0, "c": "g"}, {"id": 1009, "p": 1007, "s": "Л", "ini": "MK", "sp": "uz77364511", "nm": "Karimova Mamura", "pid": "uz21134355", "l": 1452.6, "r": 87.9, "c": "g"}, {"id": 1010, "p": 1007, "s": "П", "ini": "SI", "sp": "uz77364511", "nm": "Islamova Shahnoza", "pid": "uz60243667", "l": 158.9, "r": 0, "c": "g"}, {"id": 1011, "p": 1009, "s": "Л", "ini": "SB", "sp": "uz77364511", "nm": "Baxromova Shakhnoza", "pid": "uz11766040", "l": 1080.7, "r": 172.6, "c": "g"}, {"id": 1012, "p": 1009, "s": "П", "ini": "MS", "sp": "uz21134355", "nm": "Shomuzaffarova Mohkira", "pid": "uz37055575", "l": 0, "r": 0, "c": "g"}, {"id": 1013, "p": 1010, "s": "Л", "ini": "MS", "sp": "uz77364511", "nm": "Sharipova Mukhlisa", "pid": "uz78700246", "l": 70.8, "r": 0, "c": "g"}, {"id": 1014, "p": 1013, "s": "Л", "ini": "DI", "sp": "", "nm": "", "pid": "", "l": "", "r": "", "c": "g"}, {"id": 1015, "p": 1011, "s": "Л", "ini": "ZX", "sp": "ru02881474", "nm": "Xayrullaeva Zarifa", "pid": "uz30847214", "l": 963.1, "r": 0, "c": "g"}, {"id": 1016, "p": 1011, "s": "П", "ini": "RK", "sp": "uz11766040", "nm": "Khamzaeva Rano", "pid": "uz11478036", "l": 0, "r": 0, "c": "g"}, {"id": 1017, "p": 1015, "s": "Л", "ini": "AN", "sp": "ru02881474", "nm": "Nigmanov Abbos", "pid": "uz14105876", "l": 380, "r": 0, "c": "g"}, {"id": 1018, "p": 1017, "s": "Л", "ini": "SB", "sp": "ru02881474", "nm": "Bokhodirkhujaeva Sojidakhon", "pid": "uz17218832", "l": 0, "r": 0, "c": "g"}, {"id": 1019, "p": 40, "s": "Л", "ini": "SS", "sp": "uz40753654", "nm": "Saitkulova Sadokatkhon", "pid": "uz20762385", "l": 4256.1, "r": 0, "c": "g"}, {"id": 1020, "p": 1019, "s": "Л", "ini": "AS", "sp": "ru02881474", "nm": "Shodiyeva Asaloy", "pid": "uz77180775", "l": 3236, "r": 445, "c": "g"}, {"id": 1021, "p": 1020, "s": "Л", "ini": "MN", "sp": "uz40753654", "nm": "Narimonova Mariya", "pid": "uz33673108", "l": 2734, "r": 0, "c": "g"}, {"id": 1022, "p": 1020, "s": "П", "ini": "UI", "sp": "uz77180775", "nm": "Ibragimova Umida", "pid": "uz85227722", "l": 0, "r": 0, "c": "g"}, {"id": 1023, "p": 1021, "s": "Л", "ini": "NA", "sp": "uz03993826", "nm": "Alomova Nigora", "pid": "uz70347545", "l": 2307.8, "r": 0, "c": "g"}, {"id": 1024, "p": 1023, "s": "Л", "ini": "OJ", "sp": "uz40753654", "nm": "Jumayeva Oygul", "pid": "uz75607167", "l": 1825.3, "r": 0, "c": "g"}, {"id": 1025, "p": 1024, "s": "Л", "ini": "DT", "sp": "ru02881474", "nm": "Talipova Dilorom", "pid": "uz63183175", "l": 1477.8, "r": 0, "c": "g"}, {"id": 1026, "p": 1025, "s": "Л", "ini": "SA", "sp": "ru02881474", "nm": "Adilova Soniya", "pid": "uz85550488", "l": 782.5, "r": 55, "c": "g"}, {"id": 1027, "p": 1026, "s": "Л", "ini": "TA", "sp": "uz05270817", "nm": "Abdullayeva Taxmina", "pid": "uz37167221", "l": 489.5, "r": 0, "c": "g"}, {"id": 1028, "p": 1026, "s": "П", "ini": "SK", "sp": "uz85550488", "nm": "Kakhramanova Shakhnozabonu", "pid": "uz18803416", "l": 0, "r": 0, "c": "g"}, {"id": 1029, "p": 1027, "s": "Л", "ini": "KI", "sp": "uz40753654", "nm": "Ismoil Khilola", "pid": "uz41757854", "l": 169.9, "r": 0, "c": "g"}, {"id": 1030, "p": 1029, "s": "Л", "ini": "DZ", "sp": "uz40753654", "nm": "Ziyadullayeva Durdona", "pid": "uz30828541", "l": 0, "r": 0, "c": "g"}];
+const KEY="tree_app_v1";
+let N=[];
+function load(){let a=null;try{const s=localStorage.getItem(KEY);if(s){const x=JSON.parse(s);if(Array.isArray(x)&&x.length)a=x}}catch(e){}
+const mk=()=>{try{localStorage.setItem(KEY+"_m","2")}catch(e){}};
+if(!a){N=JSON.parse(JSON.stringify(SEED));mk();save();return}
+let f=null;try{f=localStorage.getItem(KEY+"_m")}catch(e){}
+if(f!=="2"){const have=new Set(a.map(x=>x.id));SEED.forEach(s=>{if(s.id>=1000&&!have.has(s.id))a.push(JSON.parse(JSON.stringify(s)))});mk();N=a;save();setTimeout(()=>toast("Добавлены новые узлы"),300);return}
+N=a}
+function save(){let ok=false;try{localStorage.setItem(KEY,JSON.stringify(N));ok=true}catch(e){}
+const s=document.getElementById("st");if(s){const t=new Date().toLocaleTimeString("ru-RU",{hour:"2-digit",minute:"2-digit"});s.textContent=ok?"Сохранено "+t:"Не сохраняется";}return ok}
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const kids=id=>N.filter(n=>n.p===id).sort((a,b)=>(a.s==="П")-(b.s==="П"));
+const fmt=v=>{if(v===""||v==null)return "—";const x=Number(v);return isNaN(x)?v:x.toLocaleString("ru-RU",{maximumFractionDigits:1})};
+function depth(n){let d=0;while(n.p!=null){n=N.find(x=>x.id===n.p);if(!n)break;d++}return d}
+const autoIni=nm=>{const w=nm.split(/\s+/).filter(Boolean);return (w.length>1?w[1][0]+w[0][0]:(w[0]||"?").slice(0,2)).toUpperCase()};
+let cur=null;
+function circ(n,deep){const k=deep?kids(n.id):[];return `<li><div class="nd ${n.c||"g"}${n.id===cur?" sel":""}" data-e="${n.id}"${n.s?` data-s="${n.s}"`:""} title="${esc(n.nm)}">${esc(n.ini||"?")}</div>${k.length?"<ul>"+k.map(c=>circ(c,true)).join("")+"</ul>":""}</li>`}
+function cnt(id){return kids(id).reduce((s,c)=>s+1+cnt(c.id),0)}
+function chain(n){const a=[];while(n){a.unshift(n);n=N.find(x=>x.id===n.p)}return a}
+function render(){if(cur!=null&&!N.find(x=>x.id===cur))cur=null;
+const r=cur==null?N.filter(n=>n.p==null):[N.find(x=>x.id===cur)];
+$("tree").innerHTML=r.length?"<ul>"+r.map(n=>circ(n,cur!=null)).join("")+"</ul>":"<p>Пусто. Нажмите «+ Корень».</p>";
+const n=cur==null?null:N.find(x=>x.id===cur),I=$("info");
+if(!n){I.innerHTML='<div class="hint">Нажмите на ячейку, чтобы увидеть её структуру.</div>';return}
+const k=kids(n.id),has=s=>k.some(x=>x.s===s);
+I.innerHTML=`<div class="bc">${chain(n).map(x=>`<span data-e="${x.id}">${esc(x.ini||"?")}</span>`).join(" › ")}</div>
+<div><b>${esc(n.nm||"Без имени")}</b> · Уровень ${depth(n)}</div>
+<div>ID: ${esc(n.pid||"—")} · Код сверху: ${esc(n.sp||"—")}</div>
+<div>Левое: <b>${fmt(n.l)}</b> · Правое: <b>${fmt(n.r)}</b> · В ветке: ${cnt(n.id)}</div>
+<div class="bt"><button class="pr" data-x="edit">Изменить</button>${has("Л")?"":'<button data-x="Л">+ Л</button>'}${has("П")?"":'<button data-x="П">+ П</button>'}<button data-x="up">↑ Вверх</button><button data-x="root">⌂ К корню</button><button data-x="pdf">PDF ветки</button><button data-x="home">Свернуть</button></div>`}
+function go(id){cur=id;render();const s=document.querySelector(".nd.sel")||document.querySelector(".nd");if(s)s.scrollIntoView({inline:"center",block:"nearest"})}
+function toast(t){const e=$("t");e.textContent=t;e.style.display="block";clearTimeout(toast.x);toast.x=setTimeout(()=>e.style.display="none",2600)}
+function form(n,isNew){
+$("f").innerHTML=`<h2>${isNew?"Новый узел":"Редактировать узел"}</h2>
+<label>ФИО</label><input id="nm" value="${esc(n.nm)}">
+<div class="r2"><div><label>ID</label><input id="pid" value="${esc(n.pid)}"></div><div><label>Инициалы</label><input id="ini" value="${esc(n.ini)}" maxlength="4"></div></div>
+<label>Код сверху (спонсор)</label><input id="sp" value="${esc(n.sp)}">
+<div class="r2"><div><label>Левое число</label><input id="l" value="${esc(n.l)}"></div><div><label>Правое число</label><input id="r" value="${esc(n.r)}"></div></div>
+<label>Цвет обводки</label><select id="c"><option value="g">зелёная</option><option value="y">жёлтая</option><option value="p">розовая</option></select>
+<div class="act">${isNew?"":'<button class="b d" id="del">Удалить</button>'}<button class="b ol" id="cx">Отмена</button><button class="b" id="ok">Сохранить</button></div>`;
+$("c").value=n.c||"g";$("m").classList.add("on");
+$("cx").onclick=()=>$("m").classList.remove("on");
+if(!isNew)$("del").onclick=()=>{const ids=new Set([n.id]);let ch=true;while(ch){ch=false;N.forEach(x=>{if(!ids.has(x.id)&&ids.has(x.p)){ids.add(x.id);ch=true}})}
+if(!confirm(ids.size>1?"Удалить узел и всех его потомков ("+ids.size+")?":"Удалить узел «"+(n.nm||n.ini||"без имени")+"»?"))return;
+const up=n.p;N=N.filter(x=>!ids.has(x.id));save();$("m").classList.remove("on");cur=cur!=null&&ids.has(cur)?up:cur;render()};
+$("ok").onclick=()=>{const nm=$("nm").value.trim();if(!nm){toast("Укажите ФИО");return}
+const pidv=$("pid").value.trim();
+if(pidv){const d=N.find(x=>x.pid===pidv&&x!==n);if(d&&!confirm("ID «"+pidv+"» уже есть у «"+(d.nm||d.ini||"без имени")+"». Сохранить всё равно?"))return}
+n.nm=nm;n.pid=pidv;n.sp=$("sp").value.trim();n.l=$("l").value.trim();n.r=$("r").value.trim();n.c=$("c").value;
+n.ini=$("ini").value.trim().toUpperCase()||autoIni(nm);
+if(isNew)N.push(n);save();render();$("m").classList.remove("on")}}
+const blank=(p,s)=>({id:Math.max(0,...N.map(x=>x.id))+1,p,s,ini:"",sp:"",nm:"",pid:"",l:"",r:"",c:"g"});
+$("tree").onclick=e=>{const c=e.target.closest("[data-e]");if(c)go(+c.dataset.e)};
+$("info").onclick=e=>{const b=e.target.closest("[data-x],[data-e]");if(!b)return;if(b.dataset.e){go(+b.dataset.e);return}
+const n=N.find(x=>x.id===cur),x=b.dataset.x;if(!n)return;
+if(x==="edit")form(n,false);else if(x==="up")go(n.p);else if(x==="root")go(rootId());else if(x==="pdf")pdf(n.id);else if(x==="home")go(null);else{const nn=blank(n.id,x);nn.sp=x==="Л"?n.sp:n.pid;form(nn,true)}};
+$("addRoot").onclick=()=>{if(N.some(x=>x.p==null)&&!confirm("Корень уже есть. Добавить ещё один?"))return;form(blank(null,""),true)};
+$("m").onclick=e=>{if(e.target.id==="m")$("m").classList.remove("on")};
+
+/* Сохранение файлов: на телефоне — меню «Поделиться» (Сохранить в Файлы), иначе обычное скачивание */
+async function dl(name,data,mime){
+const blob=data instanceof Blob?data:new Blob([data],{type:mime||"application/octet-stream"});
+try{if(matchMedia("(pointer:coarse)").matches&&navigator.canShare){const f=new File([blob],name,{type:blob.type});
+if(navigator.canShare({files:[f]})){await navigator.share({files:[f]});toast("Готово");return}}}
+catch(e){if(e&&e.name==="AbortError"){toast("Отменено");return}}
+try{const u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();
+setTimeout(()=>URL.revokeObjectURL(u),5000);toast("Файл сохранён: "+name)}catch(e){toast("Не удалось сохранить файл")}}
+$("exJ").onclick=()=>dl("tree.json",JSON.stringify(N,null,1),"application/json");
+$("exC").onclick=()=>{const h=["№","Инициалы","Уровень","Код сверху (спонсор)","ФИО","ID","Родитель (№)","Сторона","Левое число","Правое число","Цвет"];
+const cn={g:"зелёная",y:"жёлтая",p:"розовая"};const q=v=>'"'+String(v==null?"":v).replace(/"/g,'""')+'"';
+const rows=N.map(n=>[n.id,n.ini,depth(n),n.sp,n.nm,n.pid,n.p==null?"":n.p,n.s,n.l,n.r,cn[n.c]||""].map(q).join(";"));
+dl("tree.csv","﻿"+[h.map(q).join(";"),...rows].join("\r\n"),"text/csv;charset=utf-8")};
+
+/* Импорт с проверкой структуры */
+function validate(a){
+if(!Array.isArray(a)||!a.length)throw new Error("файл пуст или это не список узлов");
+const ids=new Set(),sides=new Set();
+a.forEach(x=>{if(!x||typeof x!=="object"||typeof x.id!=="number"||!isFinite(x.id))throw new Error("у узла нет числового id");
+if(ids.has(x.id))throw new Error("повторяется №"+x.id);ids.add(x.id)});
+a.forEach(x=>{if(x.p==null)return;if(!ids.has(x.p))throw new Error("у узла №"+x.id+" нет родителя №"+x.p);
+const k=x.p+"|"+(x.s==="П"?"П":"Л");if(sides.has(k))throw new Error("у узла №"+x.p+" два потомка на одной стороне");sides.add(k)});
+const par=new Map(a.map(x=>[x.id,x.p==null?null:x.p]));
+for(const x of a){let c=x.id,s=0;while(par.get(c)!=null){c=par.get(c);if(++s>a.length)throw new Error("в структуре есть цикл")}}
+const t=v=>v==null?"":v;
+return a.map(x=>({id:x.id,p:x.p==null?null:x.p,s:x.p==null?"":(x.s==="П"?"П":"Л"),ini:String(t(x.ini)),sp:String(t(x.sp)),nm:String(t(x.nm)),pid:String(t(x.pid)),l:t(x.l),r:t(x.r),c:["g","y","p"].includes(x.c)?x.c:"g"}))}
+$("imp").onclick=()=>$("fi").click();
+$("fi").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+r.onload=()=>{try{const a=validate(JSON.parse(r.result));if(!confirm("Заменить текущие данные импортированными ("+a.length+" узл.)?"))return;N=a;cur=null;save();render();toast("Импортировано: "+a.length)}catch(x){toast("Неверный файл: "+(x&&x.message||"ошибка"))}};
+r.onerror=()=>toast("Не удалось прочитать файл");r.readAsText(f);e.target.value=""};
+$("rst").onclick=()=>{if(confirm("Вернуть исходные данные? Ваши изменения будут потеряны.")){N=JSON.parse(JSON.stringify(SEED));cur=null;save();render()}};
+const rootId=()=>{const r=N.find(x=>x.p==null);return r?r.id:null};
+$("hm").onclick=()=>go(rootId());
+$("pdfA").onclick=()=>pdf(rootId());
+
+/* Минимальный PDF-writer: одна страница с JPEG — работает без интернета и без библиотек */
+function makePdf(jpg,w,h,pw,ph){
+const enc=new TextEncoder(),parts=[],off=[];let len=0;
+const add=d=>{const b=typeof d==="string"?enc.encode(d):d;parts.push(b);len+=b.length};
+const obj=(n,s)=>{off[n]=len;add(n+" 0 obj\n"+s+"\nendobj\n")};
+add("%PDF-1.4\n");
+obj(1,"<< /Type /Catalog /Pages 2 0 R >>");
+obj(2,"<< /Type /Pages /Kids [3 0 R] /Count 1 >>");
+obj(3,"<< /Type /Page /Parent 2 0 R /MediaBox [0 0 "+pw+" "+ph+"] /Resources << /XObject << /Im0 4 0 R >> >> /Contents 5 0 R >>");
+off[4]=len;add("4 0 obj\n<< /Type /XObject /Subtype /Image /Width "+w+" /Height "+h+" /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length "+jpg.length+" >>\nstream\n");add(jpg);add("\nendstream\nendobj\n");
+const cs="q "+pw+" 0 0 "+ph+" 0 0 cm /Im0 Do Q";
+obj(5,"<< /Length "+cs.length+" >>\nstream\n"+cs+"\nendstream");
+const xr=len;let t="xref\n0 6\n0000000000 65535 f \n";
+for(let i=1;i<=5;i++)t+=String(off[i]).padStart(10,"0")+" 00000 n \n";
+add(t+"trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n"+xr+"\n%%EOF\n");
+return new Blob(parts,{type:"application/pdf"})}
+async function pdf(id){const root=N.find(x=>x.id===id);if(!root){toast("Нет данных");return}
+const lv={},pos={};let leaf=0;
+const lay=(n,d)=>{lv[n.id]=d;const k=kids(n.id);if(!k.length)pos[n.id]=leaf++;else{k.forEach(c=>lay(c,d+1));pos[n.id]=(pos[k[0].id]+pos[k[k.length-1].id])/2}};
+lay(root,0);
+const CW=132,CH=70,GX=146,GY=112,M=30,T=60,md=Math.max(...Object.values(lv));
+const W=Math.max(Math.round(leaf*GX+2*M),420),H=(md+1)*GY+T+M;
+const s=Math.min(2,8000/Math.max(W,H),Math.sqrt(12e6/(W*H)));
+const cv=document.createElement("canvas");cv.width=Math.round(W*s);cv.height=Math.round(H*s);
+const x=cv.getContext("2d");x.scale(s,s);x.fillStyle="#fff";x.fillRect(0,0,W,H);
+const cx=n=>M+GX/2+pos[n.id]*GX,tp=n=>T+lv[n.id]*GY;
+const all=[];const col=n=>{all.push(n);kids(n.id).forEach(col)};col(root);
+x.fillStyle="#2e7d32";x.font="bold 16px Arial";x.textAlign="left";x.fillText("Структура: "+(root.nm||root.ini)+" ("+all.length+" узл.)",M,30);
+x.strokeStyle="#43a047";x.lineWidth=1.3;
+all.forEach(n=>{const k=kids(n.id);if(!k.length)return;const pb=tp(n)+CH,my=pb+(GY-CH)/2,xs=k.map(cx).concat([cx(n)]);
+x.beginPath();x.moveTo(cx(n),pb);x.lineTo(cx(n),my);x.moveTo(Math.min(...xs),my);x.lineTo(Math.max(...xs),my);k.forEach(c=>{x.moveTo(cx(c),my);x.lineTo(cx(c),tp(c))});x.stroke()});
+const F={g:["#c8e6c9","#43a047"],y:["#fff3b0","#f9a825"],p:["#f8bbd0","#e91e63"]};
+const rr=(a,b,w,hh,r)=>{x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+hh,r);x.arcTo(a+w,b+hh,a,b+hh,r);x.arcTo(a,b+hh,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()};
+x.textAlign="center";
+all.forEach(n=>{const c=cx(n),t=tp(n),f=F[n.c||"g"];rr(c-CW/2,t,CW,CH,6);x.fillStyle=f[0];x.fill();x.strokeStyle=f[1];x.lineWidth=n.c==="y"||n.c==="p"?2.4:1;x.stroke();
+x.fillStyle="#1b5e20";x.font="9px Arial";x.fillText("["+(n.ini||"?")+"]  ("+(n.sp||"—")+")  ·  Ур. "+depth(n),c,t+12);
+x.font="bold 10px Arial";let y=t+25;const w=(n.nm||"").split(/\s+/),ls=[];let cl="";
+w.forEach(z=>{if(x.measureText((cl+" "+z).trim()).width>CW-10&&cl){ls.push(cl);cl=z}else cl=(cl+" "+z).trim()});ls.push(cl);
+ls.slice(0,3).forEach(l=>{x.fillText(l,c,y);y+=11});
+x.fillText("("+(n.pid||"—")+")",c,y);
+x.font="10px Arial";x.fillText(fmt(n.l)+"  |  "+fmt(n.r),c,t+CH-6)});
+try{toast("Готовлю PDF…");
+const jb=await new Promise((ok,no)=>cv.toBlob(b=>b?ok(b):no(new Error("canvas")),"image/jpeg",0.92));
+const jpg=new Uint8Array(await jb.arrayBuffer());
+const k=Math.min(1,14400/Math.max(W,H));
+const blob=makePdf(jpg,cv.width,cv.height,Math.round(W*k),Math.round(H*k));
+await dl("tree_"+(root.ini||"x")+".pdf",blob,"application/pdf")}catch(e){toast("Не удалось создать PDF")}}
+$("sv").onclick=()=>{toast(save()?"Данные сохранены":"Браузер не даёт сохранять. Скачайте JSON")};
+window.addEventListener("pagehide",save);window.addEventListener("beforeunload",save);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
+
+/* PWA: установка и офлайн */
+let ip=null;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();ip=e;$("inst").hidden=false});
+$("inst").onclick=async()=>{if(!ip)return;ip.prompt();try{await ip.userChoice}catch(e){}ip=null;$("inst").hidden=true};
+window.addEventListener("appinstalled",()=>{$("inst").hidden=true;toast("Приложение установлено")});
+if("serviceWorker" in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+load();render();
+</script></body></html>
